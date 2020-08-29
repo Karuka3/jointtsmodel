@@ -5,7 +5,7 @@
 \usepackage{amsmath}
 \newcommand{\argmax}{\mathop{\rm arg~max}\limits}
 \newcommand{\argmin}{\mathop{\rm arg~min}\limits}
-\title{Topic Sentiment Joint Model with BERT}
+\title{レビューデータ分析におけるトピック抽出モデルに感情の要素と文脈を考慮した単語分散表現モデルであるBERTを導入したモデルの拡張\\「Topic Sentiment Joint Model with Word embeddings BERT」}
 \author{東北大学　経済学研究科　C0EM1023　長谷川 一旗}
 \date{\today}
 \begin{document}
@@ -14,7 +14,12 @@
 %概要
 \begin{abstract}
     \large
-    概要を後で書くよ
+    マーケティングにおいて、オンライン上に散見されるレビュー文から、消費者の商品に対する感情や消費者がどのような点に関心を持っているかについて分析することは非常に重要視されている。
+    したがって、テキストから書き手の感情を分析する感情分析やテキストからトピックと呼ばれる書き手の関心事を抽出するトピックモデルといった手法は、近年の主要な研究分野になっており、組み合わせたモデルが登場するなど研究が盛んになっている。
+    加えて、こうした感情分析やトピックモデルに対して、単語の分散表現と呼ばれる今までのBag-of-wordsより柔軟な言語表現を導入することで、性能や精度の向上を目指したモデルも存在してきている。
+    しかしながら、これら自然言語処理分野においてbag-of-wordsなどに代表される言語表現において、文脈を考慮することのできないという点が問題視されていた。
+    その問題点を解決したBERTという文脈を考慮した単語分散表現の獲得に成功したモデルの登場により、自然言語処理分野では近年大きな変化を遂げている。
+    したがって、本研究では感情分析とトピックモデルを組み合わせたモデルに対して、BERTから得られた文脈を考慮した単語分散表現を導入することで、感情分析の精度やトピック抽出での意味的結束性の向上が見られるかを検証していく。
 \end{abstract}
 \newpage
 \tableofcontents
@@ -144,7 +149,7 @@ TSWEでは、学習コーパスが短く小さい場合に、それまでのTopi
 TSWEでは、JSTにおけるディリクレ多項式成分をSentiment-Topic-Wordのディリクレ多項式成分とWord Embeddings成分の混合成分に置換している。
 このモデルでは、Word Embeddings成分から単語を生成する確率を以下のように定めている。
 \begin{equation}
-    MulT(w_{i}|\nu_{k}\omega^{T}) = \frac{{\rm exp}(\nu_{k}*\omega_{w_{i}})}{\Sigma_{w_{i}^{'}\in{W}}{\rm exp}(\nu_{k}*\omega_{w_{i}^{'}})}
+    MulT(w_{i}|\nu_{k}\omega^{\mathrm{T}}) = \frac{{\rm exp}(\nu_{k}\omega_{w_{i}})}{\Sigma_{w_{i}^{'}\in{W}}{\rm exp}(\nu_{k}\omega_{w_{i}^{'}})}
 \end{equation}
 
 図2に示すTSWEの生成過程をまとめると以下の通りである。
@@ -166,7 +171,7 @@ TSWEでは、JSTにおけるディリクレ多項式成分をSentiment-Topic-Wor
                         \item Draw a sentiment label \\ $ l_{dn}  \sim$ Multi($\pi_{d}$)
                         \item Draw a topic $z_{dn} \sim $ Multi($\theta_{d, l_{dn}}$)
                         \item Draw a binary indicator variable \\ $s_{dn} \sim $ Ber($\lambda$)
-                        \item Draw a word \\$w_{dn}  \sim (1-s_{dn})$Multi$(\phi_{z_{dn},l_{dn}})+(1 - s_{dn})MulT(\nu_{z_{dn}}\omega^{T}$)
+                        \item Draw a word \\$w_{dn}  \sim (1-s_{dn})$Multi$(\phi_{z_{dn},l_{dn}})+(1 - s_{dn})MulT(\nu_{z_{dn}}\omega^{\mathrm{T}}$)
                     \end{enumerate}
           \end{enumerate}
 \end{enumerate}
@@ -249,26 +254,175 @@ ELMoは、特徴量ベースであったためタスクに応用する際にそ�
 \section{Topic and Sentiment Model with BERT}
 \subsection{Topic and Sentiment Model with BERT}
 本研究では、文脈を考慮できないという問題点の解決のために、文脈も学習させた分散表現を既存のトピックモデルに導入することで、その性能の向上を目指す。
-本研究では、マーケティングへの応用という観点からテキストからトピックを抽出することだけでなく、センチメントの抽出も重要だと考え、分散表現を利用したセンチメントとトピックの同時抽出モデルであるTopic Sentiment Joint Model with Word Embeddings(TSWE)\cite{TSWE}を基に、
-Word2Vecで学習された分散表現ではなくBERTで学習させた文脈を考慮した分散表現を導入することで、その性能の向上を目指す。また、文脈を考慮した分散表現の導入による性能の向上を測るべく文書レベルでの感情分類タスクとトピック抽出による評価実験を行い、性能について検討していく。
+本研究では、マーケティングへの応用という観点からテキストからトピックを抽出することだけでなく、センチメントの抽出も重要だと考え、分散表現を利用したセンチメントとトピックの同時抽出モデルであるTopic Sentiment Joint Model with Word Embeddings(TSWE)\cite{TSWE}に、
+Word2Vecで学習された分散表現ではなくBERTで学習させた文脈を考慮した分散表現を導入することで、その性能の向上を目指す。また、文脈を考慮した分散表現の導入による性能の向上を測るべく文書レベルでの感情分類とトピック抽出による評価実験を行い、性能について検討していく。
+なお、本研究で用いるパラメータは表1に示す。
+
+TSWEにおける負の対数尤度は、$L_{k}$は以下のように設定される。
+\begin{multline}
+    L_{k} = \mu \parallel \nu_{k} \parallel_{2}^{2} - \\
+    \displaystyle \sum_{w_{i}\in{W}} N^{k,w_{i}}\left(\nu_{k}\omega_{w_{i}} - {\rm log} \left(\displaystyle \sum_{w_{i}^{'}\in{W}} {\rm exp}(\nu_{k}\omega_{w_{i}^{'}})\right)\right)
+\end{multline}
+
+そして、L-BFGS\cite{L-BFGS}手法を適用して、$L_k$を最小化するトピックベクトル$\nu_{k}$を導出する。
+
+\begin{table}[tbp]
+    \caption{パラメータ記号とその説明}
+    \centering
+    \begin{tabular}{ll}
+        \hline
+        パラメータ            & 説明                               \\
+        \hline \hline
+        $D$                   & 文書数                             \\
+        $d$                   & 文書インデックス                   \\
+        $N$                   & 総単語数                           \\
+        $N_{d}$               & 文書$d$に含まれる単語数            \\
+        $V$                   & 全文書に現れる単語の種類(語彙数)   \\
+        $W$                   & 文書集合                           \\
+        $w_{dn} = w_{i}$      & 文書$d$に含まれる$n$番目の単語     \\
+        $S$                   & センチメントのラベル数             \\
+        $l$                   & センチメントラベル                 \\
+        $K$                   & トピック数                         \\
+        $z$                   & 割り当てられたトピック             \\
+        $\nu$                 & トピックベクトル                   \\
+        $\omega$              & 単語の分散表現                     \\
+        $\theta$              & トピック分布                       \\
+        $\phi$                & 単語分布                           \\
+        $\pi$                 & センチメント分布                   \\
+        $\alpha,\beta,\gamma$ & ディリクレ分布のハイパーパラメータ \\
+        $s$                   & 二値指標変数                       \\
+        $\lambda$             & ベルヌーイ分布のハイパーパラメータ \\
+        \hline
+    \end{tabular}
+\end{table}
 
 \subsection{Generative process}
-\subsection{Gibbs sampling for TSWE model}
+本研究では、TSWEモデルを基礎とするため、改めてモデルの生成過程について以下に示す。
+\begin{enumerate}
+    \item For each topic-sentiment pair ($l$,$k$)
+          \begin{enumerate}
+              \item Genearte the word distribution of the sentiment-topic pair $\phi_{l,k} \sim $ Dir($\beta$)
+          \end{enumerate}
+    \item For each document $d$
+          \begin{enumerate}
+              \item Draw a distribution $\pi_{d} \sim $ Dir($\gamma$)
+              \item For $l=1$ to $S$ under document $d$
+                    \begin{enumerate}
+                        \item Draw a topic distribution \\ $ \theta_{d,l} \sim $ Dir($\alpha$)
+                    \end{enumerate}
+              \item For each word index n from 1 to $N_{d}$
+                    \begin{enumerate}
+                        \item Draw a sentiment label \\ $ l_{dn}  \sim$ Multi($\pi_{d}$)
+                        \item Draw a topic $z_{dn} \sim $ Multi($\theta_{d, l_{dn}}$)
+                        \item Draw a binary indicator variable \\ $s_{dn} \sim $ Ber($\lambda$)
+                        \item Draw a word \\$w_{dn}  \sim (1-s_{dn})$Multi$(\phi_{z_{dn},l_{dn}})+(1 - s_{dn})MulT(\nu_{z_{dn}}\omega^{\mathrm{T}}$)
+                    \end{enumerate}
+          \end{enumerate}
+\end{enumerate}
+なお、$MulT$の定義は式(1)に示している。
+\subsection{Gibbs sampling}
+事後分布を解析的に求めることは困難であるため、ギブスサンプリングを用いて事後分布を推定していく。サンプリングに必要な条件付確率は以下の通りである。
+\begin{multline}
+    P(z_{i} = k,l_{i} = l| w, z^{\neg{i}}, l^{\neg{i}}, \alpha, \beta, \gamma, \lambda, \nu, \omega) \propto
+    \\ \left((1-\lambda) \cdot \frac{N_{l,k,w_{i}}^{\neg{i}} + \beta}{N_{l,k}^{\neg{i}} + V\beta} + \lambda \cdot MulT(w_{i}|\nu_{k}\omega^{\mathrm{T}})\right)
+    \\ \cdot \frac{N_{d,l,k}^{\neg{i}} + \alpha}{N_{d,l}^{\neg{i}} + K\alpha} \cdot \frac{N_{d,l}^{\neg{i}} + \gamma}{N_{d}^{\neg{i}} + S\gamma}
+\end{multline}
+また、推定に用いられるパラメータ$\pi,\theta,\phi$は、式(4),(5),(6)で示される。
+\begin{equation}
+    \pi_{d,l} = \frac{N_{d,l} + \gamma}{N_{d} + S\gamma}
+\end{equation}
+\begin{equation}
+    \theta_{d,l,k} = \frac{N_{d,l,k} + \alpha}{N_{d,l} + K\alpha}
+\end{equation}
+\begin{equation}
+    \phi_{l,k,i} = (1-\lambda) \cdot \frac{N_{l,k,w_{i}}^{\neg{i}} + \beta}{N_{l,k}^{\neg{i}} + V\beta} + \lambda \cdot MulT(w_{i}|\nu_{k}\omega^{\mathrm{T}})
+\end{equation}
 
 %実験＆検証
 \section{Experiments}
+本節では、文脈を考慮した分散表現の導入による性能の向上を測るべく、文書レベルでの感情分類とトピック抽出による評価実験を行い、性能について検討していく。
 \subsection{Experimental setup}
 \subsubsection{Using Word Embeddings}
+本研究では、分散表現としてWord2Vec\footnotetext[2]{https://code.google.com/archive/p/word2vec/}とBERT\footnotetext[3]{https://github.com/google-research/bert}のオープンソースを利用する。
+これらのモデルは、大規模コーパスに対して学習させる場合、時間とコストが非常にかかるためこれらの事前学習済みのモデルを利用する。
+
 \subsubsection{Experimental datasets}
-\subsection{Parameter Settings}
+本研究では、感情分類用のデータセットとしてLarge Movie Review dataset(IMDbデータセット)\cite{IMDb}と呼ばれる大規模な映画レビューのデータセットを利用する。
+このデータセットは、ポジティブかネガティブかの二値分類用データで、2万5千件の訓練用データと2万5千件のテスト用データの合計5万件のデータで構成されている。
+データの前処理として、アルファベット以外の文字は削除し、アルファベットはすべて小文字にする処理も行う。加えて、
+TSWEモデルに倣い、学習済み分散表現に出現しない単語や出現頻度が2以下または15以上の単語は、ストップワードとして学習には使用しない。また、コピーされたと思われるような繰り返されたレビューについても同様に削除する。
+\subsubsection{Hyper Parameter Settings}
+事前分布のハイパーパラメータ$\alpha, \beta, \gamma$は、TSWEモデルに倣い以下のように設定する。
+\begin{equation}
+    \alpha = \frac{50}{K}
+\end{equation}
+\begin{equation}
+    \beta = 0.05
+\end{equation}
+\begin{equation}
+    \gamma = \frac{0.05A}{S}
+\end{equation}
+なお、$A$は平均的な文書長とする。
+\subsubsection{Evaluate Metrics}
+感情分類の評価指標としては、先行研究\cite{JST,TSWE}で用いられているAccuracyを利用する。Accuracyは、分類問題で一般的に用いられることの多い評価指標である。定義については、以下の式(10)に示す。
+\begin{equation}
+    Accuracy = \frac{TP + TN}{TP + TN + FP + FN}
+\end{equation}
+なお、$TP$ = True Positive, $TN$ = True Negative, $FP$ = False Positive, $FN$ = False Negativeである。
 
-\subsubsection{Experimental Results and Analysis}
+次に、トピック抽出の評価指標としては、perplexityと自己相互情報量(PMI)を利用する。perplexityは、言語モデルの評価指標として良く用いられる指標で、言語モデルの複雑さを表す。
+PMIは、Newmanら\cite{PMI}によって提案されたトピックの意味的拘束性を表す指標である。perplexityとPMIについて、以下の式(11),(12)で示す。
+\begin{equation}
+    {\rm perplexity} = {\rm exp}\left(-\frac{\sum_{d=1}^{D}{\rm log}p(w_{d})}{\sum_{d=1}^{D}N_{d}} \right)
+\end{equation}
+\begin{equation}
+    {\rm PMI}(w_{i},w_{j}) = {\rm log} \frac{p(w_{i},w_{j})}{p(w_{i})p(w_{j})}
+\end{equation}
 
+\subsection{Experimental Results and Analysis}
+本来なら、感情分類の結果およびトピック抽出の実験結果を載せ、それらについて考察、検討するところではあるが、実験の進捗が芳しくないためデータの記述統計の結果の図6~9に載せ、そちらについて少し言及していく。
+図6は、レビュー文内の文字数についての統計である。これを見るに、0から1000文字以内の比較的短いレビュー文がレビュー全体でも多いことが分かる。全体を通して、Good/Badに大きな差は見られないと思われる。
+図7は、各レビュー文内の単語数についての統計である。これを見るに、0から100単語以内の比較的短いレビューが多いことが分かる。全体を通して、Good/Badに大きな差は見られないと思われるが、0から100単語以内のレビューにおいては肯定的のレビューより否定的なレビューのほうが若干単語数が多いことが分かる。
+これは、否定的な意見のほうが追求したいポイントが明確なためだと思われる。
+図8は、一般的なストップワードを除いた頻出単語の上位20単語を示したものである。これを見るに、映画のレビューということもあり、1位2位には、映画に関連する単語が上がっている。
+しかしながら、その他の単語を見ると何かのトピックに限定されるような単語ではないことが分かる。したがって、ストップワードの調整に関しては非常に重要だと思われる。
+図9は、各テキストにおける平均単語長についての統計である。これを見るに、平均単語長は、6ぐらいであることがわかる。全体を通して、Good/Badに大きな差は見られないと思われる。
+
+\begin{figure*}
+    \begin{tabular}{cr}
+        \begin{minipage}[b]{0.5\hsize}
+            \begin{center}
+                \includegraphics[width=6cm]{picture/Characters_in_texts.png}
+                \caption{Number of characters in texts}
+            \end{center}
+        \end{minipage}
+        \hspace{1cm}
+        \begin{minipage}[b]{0.5\hsize}
+            \begin{center}
+                \includegraphics[width=6cm]{picture/Num_of_words_in_each_text.png}
+                \caption{Number of words in each text}
+            \end{center}
+        \end{minipage}
+    \end{tabular}
+\end{figure*}
+\begin{figure}[th]
+    \begin{center}
+        \includegraphics[width=8cm]{picture/Common_words_in_text.png}
+    \end{center}
+    \caption{Common Words in Text}
+\end{figure}
+\begin{figure*}
+    \begin{center}
+        \includegraphics[width=8cm]{picture/Average_word_length_in_a_text.png}
+    \end{center}
+    \caption{Average word length in each text}
+\end{figure*}
 
 %結論
 \section{Conclusions and Future Work}
-
-
+本研究では、文脈を考慮できていないというこれまでの自然言語処理タスクにおける問題点を解決した分散表現モデルを既存のトピックモデルに導入することでその性能の向上を目的とした以下の実験を行う予定であった。
+センチメントとトピックの同時抽出モデルに分散表現を取り入れたモデルに対して、文脈が考慮された分散表現を生成できる手法BERTを導入することで、感情分類の精度向上と、トピック内の意味的拘束性の向上について実験により検証していく予定である。
+しかしながら、実験コードの作成に少々時間がかかってしまったため、本格的な実験には入ることができなかった。したがって、今後は実際の実験を通してモデルの性能が向上するかどうかを検証していきたい。
 
 %\section*{謝辞}
 %本研究を進めるにあたり、指導教官である東北大学大学院経済学研究科 石垣 司准教授からは多大な助言を賜りました。この場を借りてお礼申し上げます。
@@ -286,5 +440,8 @@ Word2Vecで学習された分散表現ではなくBERTで学習させた文脈�
     \bibitem{Graph} Tutubalina, Elena \& Nikolenko, Sergey. (2017). Demographic Prediction Based on User Reviews about Medications. Computacion y Sistemas. 21. 227-241. 10.13053/CyS-21-2-2736.
     \bibitem{LSTM} Hochreiter, S. and Schmidhuber, J. (1997). Long Short-Term Memory, Neural Computation, Vol. 9, No. 8, 1735–1780
     \bibitem{Transformer} Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, Ł., \& Polosukhin, I. (2017). Attention is all you need. Advances in Neural Information Processing Systems, 2017-December(Nips), 5999–6009.
+    \bibitem{L-BFGS} Liu, D. C., \& Nocedal, J. (1989). On the limited memory BFGS method for large scale optimization. In Mathematical Programming, (Vol. 45), 503-528.
+    \bibitem{IMDb} Andrew L. Maas, Raymond E. Daly, Peter T. Pham, Dan Huang, Andrew Y. Ng, and Christopher Potts. (2011). Learning Word Vectors for Sentiment Analysis. The 49th Annual Meeting of the Association for Computational Linguistics (ACL 2011)
+    \bibitem{PMI} David Newman, Sarvnaz Karimi, and Lawrence Cavedon.(2009) External evaluation of topic models. pages 11-18, December.
 \end{thebibliography}
 \end{document}
