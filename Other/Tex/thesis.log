@@ -1,0 +1,324 @@
+This is e-upTeX, Version 3.14159265-p3.8.2-u1.25-190131-2.6 (utf8.uptex) (TeX Live 2019/W32TeX) (preloaded format=uplatex 2019.11.15)  30 AUG 2020 00:26
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**c:/Users/Kazuki/Projects/jointtsmodel/Tex/thesis
+(c:/Users/Kazuki/Projects/jointtsmodel/Tex/thesis.tex
+pLaTeX2e <2019-10-01u02>+1 (based on LaTeX2e <2019-10-01> patch level 3)
+(c:/Program Files/texlive/2019/texmf-dist/tex/platex/jsclasses/jsarticle.cls
+Document Class: jsarticle 2019/07/25 jsclasses (okumura, texjporg)
+\jsc@mpt=\dimen118
+\jsc@mmm=\dimen119
+\jsc@smallskipamount=\skip41
+LaTeX Info: Redefining \rmfamily on input line 466.
+LaTeX Info: Redefining \sffamily on input line 469.
+LaTeX Info: Redefining \ttfamily on input line 472.
+LaTeX Info: Redefining \textmc on input line 476.
+LaTeX Info: Redefining \textgt on input line 478.
+\symmincho=\mathgroup4
+LaTeX Font Info:    Overwriting symbol font `mincho' in version `bold'
+(Font)                  JY2/mc/m/n --> JY2/gt/m/n on input line 540.
+LaTeX Font Info:    Font shape `JT2/mc/m/n' will be
+(Font)              scaled to size 9.24683pt on input line 731.
+LaTeX Font Info:    Font shape `JY2/mc/m/n' will be
+(Font)              scaled to size 9.24683pt on input line 731.
+\fullwidth=\dimen120
+LaTeX Font Info:    Font shape `JT2/mc/m/n' will be
+(Font)              scaled to size 7.39746pt on input line 884.
+LaTeX Font Info:    Font shape `JY2/mc/m/n' will be
+(Font)              scaled to size 7.39746pt on input line 884.
+\c@part=\count83
+\c@section=\count84
+\c@subsection=\count85
+\c@subsubsection=\count86
+\c@paragraph=\count87
+\c@subparagraph=\count88
+\@abstractbox=\box43
+\c@figure=\count89
+\c@table=\count90
+\abovecaptionskip=\skip42
+\belowcaptionskip=\skip43
+\jsc@tocl@width=\dimen121
+\@lnumwidth=\dimen122
+\bibindent=\dimen123
+(c:/Program Files/texlive/2019/texmf-dist/tex/platex/jsclasses/jslogo.sty
+Package: jslogo 2019/07/25 okumura, texjporg
+LaTeX Info: Redefining \TeX on input line 94.
+LaTeX Info: Redefining \LaTeX on input line 147.
+LaTeX Info: Redefining \LaTeXe on input line 200.
+)
+\heisei=\count91
+) (c:/Program Files/texlive/2019/texmf-dist/tex/latex/nidanfloat/nidanfloat.sty
+Package: nidanfloat 2018/07/28 v2.9 Put double-floats at top/bottom within twocolumn mode
+\c@dblbotnumber=\count92
+\@dblbotroom=\dimen124
+\@dblbotnum=\count93
+\@floatht=\dimen125
+\@fixht=\dimen126
+\@rightfixht=\dimen127
+\@combinebox=\box44
+) (c:/Program Files/texlive/2019/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 2017/06/01 v1.1a Enhanced LaTeX Graphics (DPC,SPQR)
+ (c:/Program Files/texlive/2019/texmf-dist/tex/latex/graphics/keyval.sty
+Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
+\KV@toks@=\toks15
+) (c:/Program Files/texlive/2019/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2019/11/01 v1.3d Standard LaTeX Graphics (DPC,SPQR)
+ (c:/Program Files/texlive/2019/texmf-dist/tex/latex/graphics/trig.sty
+Package: trig 2016/01/03 v1.10 sin cos tan (DPC)
+) (c:/Program Files/texlive/2019/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: dvipdfmx.def on input line 105.
+ (c:/Program Files/texlive/2019/texmf-dist/tex/latex/graphics-def/dvipdfmx.def
+File: dvipdfmx.def 2017/06/24 v5.0g Graphics/color driver for dvipdfmx
+))
+\Gin@req@height=\dimen128
+\Gin@req@width=\dimen129
+) (c:/Program Files/texlive/2019/texmf-dist/tex/latex/graphics/color.sty
+Package: color 2016/07/10 v1.1e Standard LaTeX Color (DPC)
+ (c:/Program Files/texlive/2019/texmf-dist/tex/latex/graphics-cfg/color.cfg
+File: color.cfg 2016/01/02 v1.6 sample color configuration
+)
+Package color Info: Driver file: dvipdfmx.def on input line 147.
+ (c:/Program Files/texlive/2019/texmf-dist/tex/latex/graphics/dvipsnam.def
+File: dvipsnam.def 2016/06/17 v3.0m Driver-dependent file (DPC,SPQR)
+)) (c:/Program Files/texlive/2019/texmf-dist/tex/latex/amsmath/amsmath.sty
+Package: amsmath 2019/04/01 v2.17c AMS math features
+\@mathmargin=\skip44
+
+For additional information on amsmath, use the `?' option.
+(c:/Program Files/texlive/2019/texmf-dist/tex/latex/amsmath/amstext.sty
+Package: amstext 2000/06/29 v2.01 AMS text
+ (c:/Program Files/texlive/2019/texmf-dist/tex/latex/amsmath/amsgen.sty
+File: amsgen.sty 1999/11/30 v2.0 generic functions
+\@emptytoks=\toks16
+\ex@=\dimen130
+)) (c:/Program Files/texlive/2019/texmf-dist/tex/latex/amsmath/amsbsy.sty
+Package: amsbsy 1999/11/29 v1.2d Bold Symbols
+\pmbraise@=\dimen131
+) (c:/Program Files/texlive/2019/texmf-dist/tex/latex/amsmath/amsopn.sty
+Package: amsopn 2016/03/08 v2.02 operator names
+)
+\inf@bad=\count94
+LaTeX Info: Redefining \frac on input line 227.
+\uproot@=\count95
+\leftroot@=\count96
+LaTeX Info: Redefining \overline on input line 389.
+\classnum@=\count97
+\DOTSCASE@=\count98
+LaTeX Info: Redefining \ldots on input line 486.
+LaTeX Info: Redefining \dots on input line 489.
+LaTeX Info: Redefining \cdots on input line 610.
+\Mathstrutbox@=\box45
+\strutbox@=\box46
+\big@size=\dimen132
+LaTeX Font Info:    Redeclaring font encoding OML on input line 733.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 734.
+\macc@depth=\count99
+\c@MaxMatrixCols=\count100
+\dotsspace@=\muskip10
+\c@parentequation=\count101
+\dspbrk@lvl=\count102
+\tag@help=\toks17
+\row@=\count103
+\column@=\count104
+\maxfields@=\count105
+\andhelp@=\toks18
+\eqnshift@=\dimen133
+\alignsep@=\dimen134
+\tagshift@=\dimen135
+\tagwidth@=\dimen136
+\totwidth@=\dimen137
+\lineht@=\dimen138
+\@envbody=\toks19
+\multlinegap=\skip45
+\multlinetaggap=\skip46
+\mathdisplay@stack=\toks20
+LaTeX Info: Redefining \[ on input line 2855.
+LaTeX Info: Redefining \] on input line 2856.
+) (./thesis.aux)
+\openout1 = `thesis.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 11.
+LaTeX Font Info:    ... okay on input line 11.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 11.
+LaTeX Font Info:    ... okay on input line 11.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 11.
+LaTeX Font Info:    ... okay on input line 11.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 11.
+LaTeX Font Info:    ... okay on input line 11.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 11.
+LaTeX Font Info:    ... okay on input line 11.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 11.
+LaTeX Font Info:    ... okay on input line 11.
+LaTeX Font Info:    Checking defaults for JY2/mc/m/n on input line 11.
+LaTeX Font Info:    ... okay on input line 11.
+LaTeX Font Info:    Checking defaults for JT2/mc/m/n on input line 11.
+LaTeX Font Info:    ... okay on input line 11.
+LaTeX Font Info:    Font shape `JT2/mc/m/n' will be
+(Font)              scaled to size 15.9785pt on input line 12.
+LaTeX Font Info:    Font shape `JY2/mc/m/n' will be
+(Font)              scaled to size 15.9785pt on input line 12.
+LaTeX Font Info:    Font shape `JT2/mc/m/n' will be
+(Font)              scaled to size 11.09619pt on input line 12.
+LaTeX Font Info:    Font shape `JY2/mc/m/n' will be
+(Font)              scaled to size 11.09619pt on input line 12.
+LaTeX Font Info:    Font shape `JY2/mc/m/n' will be
+(Font)              scaled to size 5.5481pt on input line 12.
+LaTeX Font Info:    Font shape `JT2/mc/m/n' will be
+(Font)              scaled to size 8.32214pt on input line 15.
+LaTeX Font Info:    Font shape `JY2/mc/m/n' will be
+(Font)              scaled to size 8.32214pt on input line 15.
+LaTeX Font Info:    Font shape `JT2/gt/m/n' will be
+(Font)              scaled to size 8.32214pt on input line 15.
+LaTeX Font Info:    Font shape `JY2/gt/m/n' will be
+(Font)              scaled to size 8.32214pt on input line 15.
+ [1
+
+]
+LaTeX Font Info:    Font shape `JT2/gt/m/n' will be
+(Font)              scaled to size 9.24683pt on input line 25.
+LaTeX Font Info:    Font shape `JY2/gt/m/n' will be
+(Font)              scaled to size 9.24683pt on input line 25.
+LaTeX Font Info:    Font shape `JT2/mc/m/n' will be
+(Font)              scaled to size 13.31541pt on input line 25.
+LaTeX Font Info:    Font shape `JY2/mc/m/n' will be
+(Font)              scaled to size 13.31541pt on input line 25.
+LaTeX Font Info:    Font shape `JT2/gt/m/n' will be
+(Font)              scaled to size 13.31541pt on input line 25.
+LaTeX Font Info:    Font shape `JY2/gt/m/n' will be
+(Font)              scaled to size 13.31541pt on input line 25.
+ (./thesis.toc
+LaTeX Font Info:    Font shape `JY2/mc/m/n' will be
+(Font)              scaled to size 6.47278pt on input line 3.
+LaTeX Font Info:    Font shape `JY2/mc/m/n' will be
+(Font)              scaled to size 4.62341pt on input line 3.
+)
+\tf@toc=\write3
+\openout3 = `thesis.toc'.
+
+ [2]
+LaTeX Font Info:    Font shape `JT2/gt/m/n' will be
+(Font)              scaled to size 11.09619pt on input line 44.
+LaTeX Font Info:    Font shape `JY2/gt/m/n' will be
+(Font)              scaled to size 11.09619pt on input line 44.
+ [3
+
+]
+LaTeX Font Info:    Font shape `JY2/gt/m/n' will be
+(Font)              scaled to size 6.47278pt on input line 104.
+LaTeX Font Info:    Font shape `JY2/gt/m/n' will be
+(Font)              scaled to size 4.62341pt on input line 104.
+
+Overfull \hbox (1.43646pt too wide) in paragraph at lines 104--105
+[]\OT1/cmr/m/n/10 Draw topic co-vari-ance $[][][] \OMS/cmsy/m/n/10 ^^X W[]\OT1/cmr/m/n/10 (\OT1/cmr/bx/n/10 ^^I\OML/cmm/m/it/10 ; ^^W\OT1/cmr/m/n/10 )$ 
+ []
+
+[4]
+File: picture/LDA.png Graphic file (type bmp)
+<picture/LDA.png>
+File: picture/JST.png Graphic file (type bmp)
+<picture/JST.png>
+File: picture/GaussianLDA.png Graphic file (type bmp)
+<picture/GaussianLDA.png>
+
+Overfull \hbox (14.1382pt too wide) in paragraph at lines 122--142
+[][][][] 
+ []
+
+File: picture/TSWE.png Graphic file (type bmp)
+<picture/TSWE.png>
+File: picture/Word2Vec.png Graphic file (type bmp)
+<picture/Word2Vec.png>
+LaTeX Font Info:    Font shape `JY2/gt/m/n' will be
+(Font)              scaled to size 5.5481pt on input line 194.
+LaTeX Font Info:    Font shape `JT2/mc/m/n' will be
+(Font)              scaled to size 5.5481pt on input line 194.
+LaTeX Font Info:    Font shape `JY2/gt/m/n' will be
+(Font)              scaled to size 7.39746pt on input line 196.
+[5] [6]
+File: picture/ELMo.png Graphic file (type bmp)
+<picture/ELMo.png>
+
+Overfull \hbox (61.02713pt too wide) in paragraph at lines 239--240
+ [] 
+ []
+
+File: picture/BERT.png Graphic file (type bmp)
+<picture/BERT.png>
+
+Overfull \hbox (47.11942pt too wide) in paragraph at lines 236--251
+[][][][] 
+ []
+
+[7]
+Overfull \hbox (7.00394pt too wide) detected at line 265
+ []$[] [] \OML/cmm/m/it/10 N[] []$ []  
+ []
+
+
+Overfull \hbox (10.12979pt too wide) in paragraph at lines 272--297
+ [][][][] 
+ []
+
+[8] [9]
+File: picture/Characters_in_texts.png Graphic file (type bmp)
+<picture/Characters_in_texts.png>
+File: picture/Num_of_words_in_each_text.png Graphic file (type bmp)
+<picture/Num_of_words_in_each_text.png>
+
+Overfull \hbox (47.11942pt too wide) in paragraph at lines 392--407
+[][][][] 
+ []
+
+File: picture/Common_words_in_text.png Graphic file (type bmp)
+<picture/Common_words_in_text.png>
+
+Overfull \hbox (10.32162pt too wide) in paragraph at lines 410--411
+ [] 
+ []
+
+File: picture/Average_word_length_in_a_text.png Graphic file (type bmp)
+<picture/Average_word_length_in_a_text.png>
+[10]
+Underfull \hbox (badness 1248) in paragraph at lines 430--431
+\OT1/cmr/m/n/10 In-ter-na-tional Con-fer-ence on In-for-ma-tion
+ []
+
+[11]
+Underfull \hbox (badness 5667) in paragraph at lines 440--441
+\OT1/cmr/m/n/10 (2017). De-mo-graphic Pre-dic-tion Based
+ []
+
+
+Underfull \hbox (badness 8094) in paragraph at lines 440--441
+\OT1/cmr/m/n/10 on User Re-views about Med-i-ca-tions.
+ []
+
+
+Underfull \hbox (badness 3646) in paragraph at lines 440--441
+\OT1/cmr/m/n/10 Com-puta-cion y Sis-temas. 21. 227-241.
+ []
+
+
+Underfull \hbox (badness 1005) in paragraph at lines 442--443
+[]\OT1/cmr/m/n/10 Vaswani, A., Shazeer, N., Par-mar, N.,
+ []
+
+
+Underfull \hbox (badness 3375) in paragraph at lines 445--446
+[]\OT1/cmr/m/n/10 David New-man, Sarv-naz Karimi, and
+ []
+
+[12] (./thesis.aux) ) 
+Here is how much of TeX's memory you used:
+ 1738 strings out of 492749
+ 21664 string characters out of 6137788
+ 101891 words of memory out of 5000000
+ 6183 multiletter control sequences out of 15000+600000
+ 19185 words of font info for 90 fonts, out of 8000000 for 9000
+ 934 hyphenation exceptions out of 8191
+ 30i,12n,25p,647b,498s stack positions out of 5000i,500n,10000p,200000b,80000s
+
+Output written on thesis.dvi (12 pages, 66856 bytes).
