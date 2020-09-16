@@ -301,7 +301,7 @@ class TSWE(BaseEstimator):
         self.all_perplexity = []
         n_docs, vocabSize = self.wordOccurenceMatrix.shape
         for iteration in tqdm(range(max_iter)):
-            for d in range(n_docs):
+            for d in tqdm(range(n_docs)):
                 for i, v in enumerate(word_indices(self.wordOccurenceMatrix[d, :])):
                     t = self.topics[(d, i)]
                     s = self.sentiments[(d, i)]
