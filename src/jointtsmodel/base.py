@@ -15,9 +15,10 @@ import inspect
 from sklearn.utils.validation import check_is_fitted, check_non_negative, check_random_state, check_array
 import numpy as np
 
+
 class BaseEstimator:
     """Base class for all estimators in JST
-    
+
     Parameters
     ----------
     n_topic_components : int, optional (default=10)
@@ -115,7 +116,7 @@ class BaseEstimator:
     >>> top_words = list(model.getTopKWords(vocabulary).values())
     >>> coherence_score_uci(X.toarray(),inv_vocabulary,top_words)
     1.107204574754555
-           
+
     Notes
     -----
     All estimators should specify all the parameters that can be set
@@ -234,10 +235,10 @@ class BaseEstimator:
         self.verbose = verbose
         self.random_state = random_state
         self.wordOccurenceMatrix = None
-        
+
         if self.random_state is not None:
             np.random.seed(self.random_state)
-            
+
     def _check_params(self):
         """Check model parameters."""
         if self.n_topic_components <= 0:
@@ -247,23 +248,23 @@ class BaseEstimator:
         if self.n_sentiment_components <= 0:
             raise ValueError("Invalid 'n_sentiment_components' parameter: %r"
                              % self.n_sentiment_components)
-                             
+
         if self.doc_topic_prior is not None and self.doc_topic_prior <= 0:
             raise ValueError("Invalid 'doc_topic_prior' parameter: %r"
                              % self.doc_topic_prior)
-        
+
         if self.doc_sentiment_prior is not None and self.doc_sentiment_prior <= 0:
             raise ValueError("Invalid 'doc_sentiment_prior' parameter: %r"
                              % self.doc_sentiment_prior)
-                             
+
         if self.doc_topic_sentiment_prior is not None and self.doc_topic_sentiment_prior <= 0:
             raise ValueError("Invalid 'doc_topic_sentiment_prior' parameter: %r"
                              % self.doc_topic_sentiment_prior)
-                             
+
         if self.doc_sentiment_topic_prior is not None and self.doc_sentiment_topic_prior <= 0:
             raise ValueError("Invalid 'doc_sentiment_topic_prior' parameter: %r"
                              % self.doc_sentiment_topic_prior)
-                             
+
         if self.topic_sentiment_word_prior is not None and self.topic_sentiment_word_prior <= 0:
             raise ValueError("Invalid 'topic_sentiment_word_prior' parameter: %r"
                              % self.topic_sentiment_word_prior)
@@ -274,30 +275,39 @@ class BaseEstimator:
         self.random_state_ = check_random_state(self.random_state)
 
         if self.doc_topic_prior is None:
-            self.doc_topic_prior_ = np.repeat(1. / self.n_topic_components, self.n_topic_components)
+            self.doc_topic_prior_ = np.repeat(
+                1. / self.n_topic_components, self.n_topic_components)
         else:
-            self.doc_topic_prior_ = np.repeat(self.doc_topic_prior, self.n_topic_components)
+            self.doc_topic_prior_ = np.repeat(
+                self.doc_topic_prior, self.n_topic_components)
 
         if self.doc_sentiment_prior is None:
-            self.doc_sentiment_prior_ = np.repeat(1. / self.n_sentiment_components, self.n_sentiment_components)
+            self.doc_sentiment_prior_ = np.repeat(
+                1. / self.n_sentiment_components, self.n_sentiment_components)
         else:
-            self.doc_sentiment_prior_ = np.repeat(self.doc_sentiment_prior, self.n_sentiment_components)
-            
+            self.doc_sentiment_prior_ = np.repeat(
+                self.doc_sentiment_prior, self.n_sentiment_components)
+
         if self.doc_topic_sentiment_prior is None:
-            self.doc_topic_sentiment_prior_ = np.repeat(1. / self.n_sentiment_components, self.n_sentiment_components)
+            self.doc_topic_sentiment_prior_ = np.repeat(
+                1. / self.n_sentiment_components, self.n_sentiment_components)
         else:
-            self.doc_topic_sentiment_prior_ = np.repeat(self.doc_topic_sentiment_prior, self.n_sentiment_components)
+            self.doc_topic_sentiment_prior_ = np.repeat(
+                self.doc_topic_sentiment_prior, self.n_sentiment_components)
 
         if self.doc_sentiment_topic_prior is None:
-            self.doc_sentiment_topic_prior_ = np.repeat(1. / self.n_topic_components, self.n_topic_components)
+            self.doc_sentiment_topic_prior_ = np.repeat(
+                1. / self.n_topic_components, self.n_topic_components)
         else:
-            self.doc_sentiment_topic_prior_ = np.repeat(self.doc_sentiment_topic_prior, self.n_topic_components)
-            
+            self.doc_sentiment_topic_prior_ = np.repeat(
+                self.doc_sentiment_topic_prior, self.n_topic_components)
+
         if self.topic_sentiment_word_prior is None:
-            self.topic_sentiment_word_prior_ = 1. / (self.n_topic_components * self.n_sentiment_components)
+            self.topic_sentiment_word_prior_ = 1. / \
+                (self.n_topic_components * self.n_sentiment_components)
         else:
             self.topic_sentiment_word_prior_ = self.topic_sentiment_word_prior
-            
+
     def _check_non_neg_array(self, X, whom):
         """check X format
         check X format and make sure no negative value in X.
@@ -308,7 +318,7 @@ class BaseEstimator:
         X = check_array(X)
         check_non_negative(X, whom)
         return X
-        
+
     def fit(self, X, max_iter=None):
         """Learn model for the data X with Gibbs sampling.
         Parameters
@@ -321,7 +331,7 @@ class BaseEstimator:
         self
         """
         raise NotImplementedError
-    
+
     def conditionalDistribution(self, d, v):
         """
         Calculates the joint topic-sentiment probability for word v in document d
@@ -337,7 +347,7 @@ class BaseEstimator:
             Matrix (numTopics x numSentiments) of joint probabilities
         """
         raise NotImplementedError
-        
+
     def _unnormalized_transform(self):
         """Transform data according to fitted model.
         Returns
@@ -348,7 +358,7 @@ class BaseEstimator:
             Document sentiment distribution for X. Applicable for JST.
         """
         raise NotImplementedError
-        
+
     def transform(self):
         """Transform data according to fitted model.
         Returns
@@ -359,7 +369,7 @@ class BaseEstimator:
             Document sentiment distribution for X. Applicable for JST.
         """
         raise NotImplementedError
-    
+
     def pi(self):
         """Document-topic-sentiment distribution according to fitted model.
         Returns
@@ -370,7 +380,7 @@ class BaseEstimator:
             Document-sentiment-topic distribution for X. Applicable for JST.
         """
         raise NotImplementedError
-        
+
     def loglikelihood(self):
         """Calculate log-likelihood of generating the whole corpus
         Returns
@@ -378,17 +388,17 @@ class BaseEstimator:
         Log-likelihood score: float
         """
         raise NotImplementedError
-        
+
     def perplexity(self):
         """Calculate approximate perplexity for the whole corpus.
         Perplexity is defined as exp(-1. * log-likelihood per word)
-        
+
         Returns
         ------------
         score : float
         """
         raise NotImplementedError
-        
+
     def score(self):
         """Calculate log-likelihood of generating the whole corpus as score
         Returns
@@ -396,7 +406,7 @@ class BaseEstimator:
         score: float
         """
         return self.loglikelihood()
-        
+
     def getTopKWords(self, vocabulary, num_words=5):
         """
         Returns top num_words discriminative words for topic t and sentiment s based on topic_sentiment_word distribution
@@ -412,15 +422,17 @@ class BaseEstimator:
             Dictionary with (topic,sentiment) pair as key and list of top num_words words as value.
         """
         check_is_fitted(self)
-        
+
         if len(vocabulary) != self.wordOccurenceMatrix.shape[1]:
-            raise ValueError("Length of vocabulary does not match with document-word matrix fitted by model")
-        
+            raise ValueError(
+                "Length of vocabulary does not match with document-word matrix fitted by model")
+
         pseudocounts = self.components_
         worddict = {}
         for t in range(self.n_topic_components):
             for s in range(self.n_sentiment_components):
-                topWordIndices = pseudocounts[:, t, s].argsort()[-1:-(num_words + 1):-1]
+                topWordIndices = pseudocounts[:, t,
+                                              s].argsort()[-1:-(num_words + 1):-1]
                 worddict[(t+1, s+1)] = [vocabulary[i] for i in topWordIndices]
 
         return worddict
