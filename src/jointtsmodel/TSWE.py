@@ -30,8 +30,7 @@ def L(v_k, embedding_matrix, N_k, mu=.01):
     factor1 = np.log(
         np.sum(np.exp(np.dot(v_k, embedding_matrix.T)))) * np.sum(N_k)
     factor2 = np.dot(np.dot(v_k, embedding_matrix.T), N_k)
-
-    return mu*np.linalg.norm(v_k) - factor2 + factor1
+    return (mu*np.linalg.norm(v_k)) - factor2 + factor1
 
 
 class TSWE(BaseEstimator):
@@ -85,63 +84,14 @@ class TSWE(BaseEstimator):
         after normalization:
         ``model.components_ / model.components_.sum(axis=0)[np.newaxis,:,:]``.
     doc_sentiment_prior_ : float
-        Prior of document sentiment distribution `theta`. If the value is None,
+        Prior of document sentiment distribution `pi`. If the value is None,
         it is `1 / n_sentiment_components`.
     doc_sentiment_topic_prior_ : float
-        Prior of document-sentiment-topics distribution `pi`. If the value is None,
+        Prior of document-sentiment-topics distribution `theta`. If the value is None,
         it is `1 / n_topic_components`.
     topic_sentiment_word_prior_ : float
         Prior of topic-sentiment-word distribution `beta`. If the value is None, it is
         `1 / (n_topic_components * n_sentiment_components)`.
-    Examples
-    --------
-    >>> from jointtsmodels.TSWE import TSWE
-    >>> from jointtsmodels.utils import coherence_score_uci
-    >>> import pandas as pd
-    >>> import numpy as np
-    >>> from sklearn.feature_extraction.text import CountVectorizer
-    >>> from sklearn.datasets import fetch_20newsgroups
-    >>> # This produces a feature matrix of token counts, similar to what
-    >>> # CountVectorizer would produce on text.
-    >>> data, _ = fetch_20newsgroups(shuffle=True, random_state=1,
-                             remove=('headers', 'footers', 'quotes'),
-                             return_X_y=True)
-    >>> data = data[:1000]
-    >>> vectorizer = CountVectorizer(max_df=0.7, min_df=10,
-                                max_features=5000,
-                                stop_words='english')
-    >>> X = vectorizer.fit_transform(data)
-    >>> vocabulary = vectorizer.get_feature_names()
-    >>> inv_vocabulary = dict(zip(vocabulary,np.arange(len(vocabulary))))
-    >>> lexicon_data = pd.read_excel('../lexicon/prior_sentiment.xlsx')
-    >>> lexicon_data = lexicon_data.dropna()
-    >>> lexicon_dict = dict(zip(lexicon_data['Word'],lexicon_data['Sentiment']))
-    >>> embeddings_index = {}
-    >>> f = open('embeddings/glove.6B.100d.txt','r',encoding='utf8')
-    >>> for i, line in enumerate(f):
-            values = line.split()
-            word = values[0]
-            coefs = np.asarray(values[1:], dtype='float32')
-            embeddings_index[word] = coefs
-    >>> f.close()
-    >>> print('Found %s word vectors.' % len(embeddings_index))
-    >>> embedding_matrix = np.zeros((X.shape[1], 100))
-    >>> for i, word in enumerate(vocabulary):
-            if word in embeddings_index:
-                embedding_matrix[i] = embeddings_index[word]
-            else:
-                embedding_matrix[i] = np.zeros(100)
-    >>> model = TSWE(embedding_dim=100,n_topic_components=5,n_sentiment_components=5,
-    ...     random_state=0)
-    >>> model.fit(X.toarray(), lexicon_dict, embedding_matrix)
-    TSWE(...)
-    >>> # get topics for some given samples:
-    >>> model.transform()[:2]
-    array([[0.00360392, 0.25499205, 0.0036211 , 0.64236448, 0.09541846],
-           [0.15297572, 0.00362644, 0.44412786, 0.39568399, 0.003586  ]])
-    >>> top_words = list(model.getTopKWords(vocabulary).values())
-    >>> coherence_score_uci(X.toarray(),inv_vocabulary,top_words)
-    1.107204574754555
 
     Reference
     ---------
@@ -203,20 +153,19 @@ class TSWE(BaseEstimator):
 
         self.topics = {}
         self.sentiments = {}
-
-        self.alphaVec = self.doc_sentiment_prior_.copy()
-        self.gammaVec = self.doc_sentiment_topic_prior_
+        self.alphaVec = self.doc_sentiment_topic_prior_
+        self.gammaVec = self.doc_sentiment_prior_.copy()
         self.beta = self.topic_sentiment_word_prior_
 
         for d in range(n_docs):
-
-            sentimentDistribution = sampleFromDirichlet(self.alphaVec)
+            sentimentDistribution = sampleFromDirichlet(self.gammaVec)
             topicDistribution = np.zeros(
                 (self.n_sentiment_components, self.n_topic_components))
-            for s in range(self.n_sentiment_components):
-                topicDistribution[s, :] = sampleFromDirichlet(self.gammaVec)
-            for i, w in enumerate(word_indices(self.wordOccurenceMatrix[d, :])):
 
+            for s in range(self.n_sentiment_components):
+                topicDistribution[s, :] = sampleFromDirichlet(self.alphaVec)
+
+            for i, w in enumerate(word_indices(self.wordOccurenceMatrix[d, :])):
                 s = sampleFromCategorical(sentimentDistribution)
                 t = sampleFromCategorical(topicDistribution[s, :])
 
@@ -227,8 +176,8 @@ class TSWE(BaseEstimator):
                 self.n_ds[d, s] += 1
                 self.n_dst[d, s, t] += 1
                 self.n_d[d] += 1
-                self.n_vts[w, t, s*prior_sentiment] += 1
                 self.n_ts[t, s] += 1
+                self.n_vts[w, t, s*prior_sentiment] += 1
                 self.n_vt[w, t] += 1
 
     def conditionalDistribution(self, d, v):
@@ -247,14 +196,14 @@ class TSWE(BaseEstimator):
         """
         probabilities_ts = np.ones(
             (self.n_topic_components, self.n_sentiment_components))
-        firstFactor = (self.n_ds[d] + self.alphaVec) / \
-            (self.n_d[d] + np.sum(self.alphaVec))
+
+        firstFactor = (self.n_ds[d] + self.gammaVec) / \
+            (self.n_d[d] + np.sum(self.gammaVec))
         secondFactor = np.zeros(
             (self.n_topic_components, self.n_sentiment_components))
         for s in range(self.n_sentiment_components):
-
-            secondFactor[:, s] = ((self.n_dst[d, s, :] + self.gammaVec) /
-                                  (self.n_ds[d, s] + np.sum(self.gammaVec)))
+            secondFactor[:, s] = (
+                (self.n_dst[d, s, :] + self.alphaVec) / (self.n_ds[d, s] + np.sum(self.alphaVec)))
 
         thirdFactor = (self.n_vts[v, :, :] + self.beta) / \
             (self.n_ts + self.n_vts.shape[0] * self.beta)
@@ -263,15 +212,13 @@ class TSWE(BaseEstimator):
         # for k in range(self.n_topic_components):
         #    forthFactor[k,:] = np.exp(np.dot(self.topic_embeddings[k,:],self.word_embeddings[v,:]))/np.sum(np.exp(np.dot(self.topic_embeddings[k,:],self.word_embeddings.T)))
 
-        forthFactor = np.exp(np.dot(self.topic_embeddings, self.word_embeddings[v, :]))/np.sum(
+        forthFactor = np.exp(np.dot(self.topic_embeddings, self.word_embeddings[v, :])) / np.sum(
             np.exp(np.dot(self.topic_embeddings, self.word_embeddings.T)), -1)
         probabilities_ts *= firstFactor[np.newaxis, :]
-        #probabilities_ts *= secondFactor * thirdFactor
-        probabilities_ts *= secondFactor * \
-            ((1-self.lambda_)*thirdFactor +
-             self.lambda_*forthFactor[:, np.newaxis])
+        probabilities_ts *= secondFactor
+        probabilities_ts *= ((1 - self.lambda_)*thirdFactor +
+                             (self.lambda_*forthFactor[:, np.newaxis]))
         probabilities_ts /= np.sum(probabilities_ts)
-
         return probabilities_ts
 
     def fit(self, X, lexicon_dict, word_embedding_matrix, rerun=False, max_iter=None):
@@ -301,27 +248,31 @@ class TSWE(BaseEstimator):
         self.all_perplexity = []
         n_docs, vocabSize = self.wordOccurenceMatrix.shape
         for iteration in tqdm(range(max_iter)):
-            for d in tqdm(range(n_docs)):
+            for d in range(n_docs):
                 for i, v in enumerate(word_indices(self.wordOccurenceMatrix[d, :])):
                     t = self.topics[(d, i)]
                     s = self.sentiments[(d, i)]
-                    prior_sentiment = lexicon_dict.get(v, 1)
                     self.n_ds[d, s] -= 1
                     self.n_d[d] -= 1
                     self.n_dst[d, s, t] -= 1
-                    self.n_vts[v, t, s*prior_sentiment] -= 1
+                    self.n_vts[v, t, s] -= 1
                     self.n_ts[t, s] -= 1
                     self.n_vt[v, t] -= 1
 
                     probabilities_ts = self.conditionalDistribution(d, v)
-                    ind = sampleFromCategorical(probabilities_ts.flatten())
-                    t, s = np.unravel_index(ind, probabilities_ts.shape)
+                    if v in lexicon_dict:
+                        s = lexicon_dict[v]
+                        t = sampleFromCategorical(probabilities_ts[:, s])
+                    else:
+                        a = probabilities_ts.flatten()
+                        ind = np.argmax(a)
+                        t, s = np.unravel_index(ind, probabilities_ts.shape)
 
                     self.topics[(d, i)] = t
                     self.sentiments[(d, i)] = s
                     self.n_d[d] += 1
                     self.n_dst[d, s, t] += 1
-                    self.n_vts[v, t, s*prior_sentiment] += 1
+                    self.n_vts[v, t, s] += 1
                     self.n_ts[t, s] += 1
                     self.n_ds[d, s] += 1
                     self.n_vt[v, t] += 1
@@ -336,7 +287,7 @@ class TSWE(BaseEstimator):
 
                 self.alphaVec *= numerator / denominator
             '''
-            if self.prior_update_step > 0 and (iteration+1) % self.prior_update_step == 0:
+            if self.prior_update_step > 0 and (iteration + 1) % self.prior_update_step == 0:
                 #print("Updating topic embeddings")
                 for k in range(self.n_topic_components):
                     res = minimize(L, self.topic_embeddings[k, :], method='L-BFGS-B', args=(
@@ -353,7 +304,7 @@ class TSWE(BaseEstimator):
             #    if self.verbose > 0:
             #        print ("Perplexity after iteration {} (out of {} iterations) is {:.2f}".format(iteration + 1, max_iter, perplexity_))
 
-        self.doc_sentiment_prior_ = self.alphaVec
+        self.doc_sentiment_prior_ = self.gammaVec
         normalized_n_vts = self.n_vts.copy() + self.beta
         normalized_n_vts /= normalized_n_vts.sum(0)[np.newaxis, :, :]
         self.components_ = normalized_n_vts
@@ -399,6 +350,9 @@ class TSWE(BaseEstimator):
         return self.fit(X, lexicon_dict, rerun=rerun, max_iter=max_iter).transform()
 
     def pi(self):
+        return self.transform()
+
+    def theta(self):
         """Document-sentiment-topic distribution according to fitted model.
         Returns
         -------
@@ -426,3 +380,11 @@ class TSWE(BaseEstimator):
         score : float
         """
         raise NotImplementedError("To be implemented")
+
+    def getSentiment(self, data_size):
+        normalized_n_ds = self.transform()
+        y_pred = []
+        for d in range(data_size):
+            max_index = np.argmax(normalized_n_ds[d])
+            y_pred.append(max_index)
+        return y_pred

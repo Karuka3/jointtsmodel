@@ -12,6 +12,7 @@ import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.datasets import fetch_20newsgroups
+from sklearn.metrics import accuracy_score
 from jointtsmodel.TSWE import TSWE
 from jointtsmodel.utils import coherence_score_uci, Hscore
 
@@ -58,8 +59,8 @@ for i, word in enumerate(vocabulary):
 model = TSWE(embedding_dim=100, n_topic_components=5,
              n_sentiment_components=5, random_state=123, evaluate_every=2)
 model.fit(X.toarray(), lexicon_dict, embedding_matrix)
+y_pred = model.getSentiment(1000)
 
-# model.transform()[:2]
 
 ### Evaluation ###
 top_words = list(model.getTopKWords(vocabulary).values())

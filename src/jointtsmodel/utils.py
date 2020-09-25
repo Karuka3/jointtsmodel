@@ -212,5 +212,5 @@ def Hscore(transformedX, subsample=1.0):
     return intradist/interdist
 
 
-def perplexity_score():
+def normalized_pointwise_mutual_information(x, y, corpus):
     pass

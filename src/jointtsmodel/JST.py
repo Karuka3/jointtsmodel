@@ -23,9 +23,10 @@ from .base import BaseEstimator
 from .utils import sampleFromDirichlet, sampleFromCategorical, log_multi_beta, word_indices
 from .utils import coherence_score_uci, coherence_score_umass, symmetric_kl_score, Hscore
 
+
 class JST(BaseEstimator):
     """JST model
-    
+
     Parameters
     ----------
     n_topic_components : int, optional (default=10)
@@ -112,11 +113,11 @@ class JST(BaseEstimator):
     >>> top_words = list(model.getTopKWords(vocabulary).values())
     >>> coherence_score_uci(X.toarray(),inv_vocabulary,top_words)
     1.107204574754555
-           
+
     Reference
     ---------
         [1] https://www.researchgate.net/publication/47454505_oroopenacuk_A_Comparative_Study_of_Bayesian_Models_for_Unsupervised_Sentiment_Detection
-    
+
     Notes
     -----
     All estimators should specify all the parameters that can be set
@@ -128,12 +129,12 @@ class JST(BaseEstimator):
                  doc_topic_sentiment_prior=None, doc_sentiment_topic_prior=None,
                  topic_sentiment_word_prior=None, max_iter=10,
                  prior_update_step=5, evaluate_every=1, verbose=1, random_state=None):
-        
+
         super().__init__(n_topic_components=n_topic_components, n_sentiment_components=n_sentiment_components, doc_topic_prior=doc_topic_prior, doc_sentiment_prior=doc_sentiment_prior,
-                 doc_topic_sentiment_prior=doc_topic_sentiment_prior, doc_sentiment_topic_prior=doc_sentiment_topic_prior,
-                 topic_sentiment_word_prior=topic_sentiment_word_prior, max_iter=max_iter,
-                 prior_update_step=prior_update_step, evaluate_every=evaluate_every, verbose=verbose, random_state=random_state)
-        
+                         doc_topic_sentiment_prior=doc_topic_sentiment_prior, doc_sentiment_topic_prior=doc_sentiment_topic_prior,
+                         topic_sentiment_word_prior=topic_sentiment_word_prior, max_iter=max_iter,
+                         prior_update_step=prior_update_step, evaluate_every=evaluate_every, verbose=verbose, random_state=random_state)
+
     def _initialize_(self, X, lexicon_dict):
         """Initialize fit variables
         Parameters
@@ -146,19 +147,22 @@ class JST(BaseEstimator):
         -------
         self
         """
-        
+
         self.wordOccurenceMatrix = X
         self._check_params()
         self._init_latent_vars()
-        
+
         n_docs, vocabSize = self.wordOccurenceMatrix.shape
 
         # Pseudocounts
         self.n_ds = np.zeros((n_docs, self.n_sentiment_components))
-        self.n_dst = np.zeros((n_docs, self.n_sentiment_components,self.n_topic_components))
+        self.n_dst = np.zeros(
+            (n_docs, self.n_sentiment_components, self.n_topic_components))
         self.n_d = np.zeros((n_docs))
-        self.n_vts = np.zeros((vocabSize, self.n_topic_components, self.n_sentiment_components))
-        self.n_ts = np.zeros((self.n_topic_components, self.n_sentiment_components))
+        self.n_vts = np.zeros(
+            (vocabSize, self.n_topic_components, self.n_sentiment_components))
+        self.n_ts = np.zeros(
+            (self.n_topic_components, self.n_sentiment_components))
 
         self.topics = {}
         self.sentiments = {}
@@ -168,26 +172,24 @@ class JST(BaseEstimator):
         self.beta = self.topic_sentiment_word_prior_
 
         for d in range(n_docs):
-            
             sentimentDistribution = sampleFromDirichlet(self.alphaVec)
-            topicDistribution = np.zeros(( self.n_sentiment_components,self.n_topic_components))
+            topicDistribution = np.zeros(
+                (self.n_sentiment_components, self.n_topic_components))
             for s in range(self.n_sentiment_components):
                 topicDistribution[s, :] = sampleFromDirichlet(self.gammaVec)
             for i, w in enumerate(word_indices(self.wordOccurenceMatrix[d, :])):
-               
-                   s = sampleFromCategorical(sentimentDistribution)
-                   t = sampleFromCategorical(topicDistribution[s, :])
-                  
-                   prior_sentiment = lexicon_dict.get(w,1)
-                   
-                   self.topics[(d, i)] = t
-                   self.sentiments[(d, i)] = s
-                   self.n_ds[d,s]+=1
-                   self.n_dst[d,s,t] += 1
-                   self.n_d[d] += 1
-                   self.n_vts[w, t, s*prior_sentiment] += 1
-                   self.n_ts[t, s] += 1
-    
+                s = sampleFromCategorical(sentimentDistribution)
+                t = sampleFromCategorical(topicDistribution[s, :])
+                prior_sentiment = lexicon_dict.get(w, 1)
+
+                self.topics[(d, i)] = t
+                self.sentiments[(d, i)] = s
+                self.n_ds[d, s] += 1
+                self.n_dst[d, s, t] += 1
+                self.n_d[d] += 1
+                self.n_vts[w, t, s*prior_sentiment] += 1
+                self.n_ts[t, s] += 1
+
     def conditionalDistribution(self, d, v):
         """
         Calculates the joint topic-sentiment probability for word v in document d
@@ -202,24 +204,23 @@ class JST(BaseEstimator):
         x: matrix
             Matrix (n_topic_components x n_sentiment_components) of joint probabilities
         """
-        probabilities_ts = np.ones((self.n_topic_components, self.n_sentiment_components))
+        probabilities_ts = np.ones(
+            (self.n_topic_components, self.n_sentiment_components))
         firstFactor = (self.n_ds[d] + self.alphaVec) / \
-            (self.n_d[d] +  np.sum(self.alphaVec))
-        secondFactor = np.zeros((self.n_topic_components,self.n_sentiment_components))
+            (self.n_d[d] + np.sum(self.alphaVec))
+        secondFactor = np.zeros(
+            (self.n_topic_components, self.n_sentiment_components))
         for s in range(self.n_sentiment_components):
-        
-             secondFactor[:,s] = ((self.n_dst[d, s, :] + self.gammaVec) / \
-            (self.n_ds[d, s] + np.sum(self.gammaVec)))
-
-        thirdFactor = (self.n_vts[v,:, :] + self.beta) / \
+            secondFactor[:, s] = ((self.n_dst[d, s, :] + self.gammaVec) /
+                                  (self.n_ds[d, s] + np.sum(self.gammaVec)))
+        thirdFactor = (self.n_vts[v, :, :] + self.beta) / \
             (self.n_ts + self.n_vts.shape[0] * self.beta)
 
-        probabilities_ts *= firstFactor[np.newaxis,:]
+        probabilities_ts *= firstFactor[np.newaxis, :]
         probabilities_ts *= secondFactor * thirdFactor
         probabilities_ts /= np.sum(probabilities_ts)
-        
         return probabilities_ts
-        
+
     def fit(self, X, lexicon_dict, rerun=False, max_iter=None):
         """Learn model for the data X with Gibbs sampling.
         Parameters
@@ -237,11 +238,12 @@ class JST(BaseEstimator):
         """
         if rerun == False:
             self._initialize_(X, lexicon_dict)
-            
-        self.wordOccurenceMatrix = self._check_non_neg_array(self.wordOccurenceMatrix, "JST.fit")
+
+        self.wordOccurenceMatrix = self._check_non_neg_array(
+            self.wordOccurenceMatrix, "JST.fit")
         if max_iter is None:
             max_iter = self.max_iter
-        
+
         self.all_loglikelihood = []
         self.all_perplexity = []
         n_docs, vocabSize = self.wordOccurenceMatrix.shape
@@ -250,51 +252,54 @@ class JST(BaseEstimator):
                 for i, v in enumerate(word_indices(self.wordOccurenceMatrix[d, :])):
                     t = self.topics[(d, i)]
                     s = self.sentiments[(d, i)]
-                    prior_sentiment = lexicon_dict.get(v,1)
-                    self.n_ds[d,s]-=1
+                    prior_sentiment = lexicon_dict.get(v, 1)
+                    self.n_ds[d, s] -= 1
                     self.n_d[d] -= 1
-                    self.n_dst[d,s,t] -= 1
+                    self.n_dst[d, s, t] -= 1
                     self.n_vts[v, t, s*prior_sentiment] -= 1
                     self.n_ts[t, s] -= 1
 
                     probabilities_ts = self.conditionalDistribution(d, v)
                     ind = sampleFromCategorical(probabilities_ts.flatten())
                     t, s = np.unravel_index(ind, probabilities_ts.shape)
-                    
+
                     self.topics[(d, i)] = t
                     self.sentiments[(d, i)] = s
                     self.n_d[d] += 1
-                    self.n_dst[d,s,t] += 1
+                    self.n_dst[d, s, t] += 1
                     self.n_vts[v, t, s*prior_sentiment] += 1
                     self.n_ts[t, s] += 1
-                    self.n_ds[d,s]+=1
-            
-            if self.prior_update_step > 0 and (iteration+1)%self.prior_update_step == 0:
+                    self.n_ds[d, s] += 1
+
+            if self.prior_update_step > 0 and (iteration+1) % self.prior_update_step == 0:
                 numerator = 0
                 denominator = 0
                 for d in range(n_docs):
-                    numerator += psi(self.n_d[d] + self.alphaVec) - psi(self.alphaVec)
-                    denominator += psi(np.sum(self.n_ds[d] + self.alphaVec)) - psi(np.sum(self.alphaVec))
-                
-                self.alphaVec *= numerator / denominator     
+                    numerator += psi(self.n_d[d] +
+                                     self.alphaVec) - psi(self.alphaVec)
+                    denominator += psi(np.sum(self.n_ds[d] + self.alphaVec)) - psi(
+                        np.sum(self.alphaVec))
+
+                self.alphaVec *= numerator / denominator
 
             loglikelihood_ = self.loglikelihood()
             perplexity_ = self.perplexity()
-            
+
             self.all_loglikelihood.append(loglikelihood_)
             self.all_perplexity.append(perplexity_)
-            
-            if self.evaluate_every > 0 and (iteration+1)%self.evaluate_every == 0:
+
+            if self.evaluate_every > 0 and (iteration+1) % self.evaluate_every == 0:
                 if self.verbose > 0:
-                    print ("Perplexity after iteration {} (out of {} iterations) is {:.2f}".format(iteration + 1, max_iter, perplexity_))
-        
+                    print("Perplexity after iteration {} (out of {} iterations) is {:.2f}".format(
+                        iteration + 1, max_iter, perplexity_))
+
         self.doc_sentiment_prior_ = self.alphaVec
         normalized_n_vts = self.n_vts.copy() + self.beta
-        normalized_n_vts /= normalized_n_vts.sum(0)[np.newaxis,:,:]
+        normalized_n_vts /= normalized_n_vts.sum(0)[np.newaxis, :, :]
         self.components_ = normalized_n_vts
-        
+
         return self
-        
+
     def _unnormalized_transform(self):
         """Transform data according to fitted model.
         Returns
@@ -303,7 +308,7 @@ class JST(BaseEstimator):
             Document sentiment distribution for X.
         """
         return self.n_ds + self.doc_sentiment_prior_
-        
+
     def transform(self):
         """Transform data according to fitted model.
         Returns
@@ -312,7 +317,7 @@ class JST(BaseEstimator):
             Document sentiment distribution for X.
         """
         normalize_n_ds = self._unnormalized_transform().copy()
-        normalize_n_ds /= normalize_n_ds.sum(1)[:,np.newaxis]
+        normalize_n_ds /= normalize_n_ds.sum(1)[:, np.newaxis]
         return normalize_n_ds
 
     def fit_transform(self, X, lexicon_dict, rerun=False, max_iter=None):
@@ -332,7 +337,7 @@ class JST(BaseEstimator):
             Document sentiment distribution for X.
         """
         return self.fit(X, lexicon_dict, rerun=rerun, max_iter=max_iter).transform()
-    
+
     def pi(self):
         """Document-sentiment-topic distribution according to fitted model.
         Returns
@@ -341,9 +346,9 @@ class JST(BaseEstimator):
             Document-sentiment-topic distribution for X.
         """
         normalized_n_dst = self.n_dst.copy() + self.gammaVec
-        normalized_n_dst /= normalized_n_dst.sum(2)[:,:,np.newaxis]
+        normalized_n_dst /= normalized_n_dst.sum(2)[:, :, np.newaxis]
         return normalized_n_dst
-        
+
     def loglikelihood(self):
         """Calculate log-likelihood of generating the whole corpus
         Returns
@@ -355,25 +360,27 @@ class JST(BaseEstimator):
 
         for z in range(self.n_topic_components):
             for s in range(self.n_sentiment_components):
-                lik += log_multi_beta(self.n_vts[:,z, s]+self.beta)
-        
-        lik -= self.n_topic_components * self.n_sentiment_components * log_multi_beta(self.beta, vocabSize)
+                lik += log_multi_beta(self.n_vts[:, z, s]+self.beta)
+
+        lik -= self.n_topic_components * self.n_sentiment_components * \
+            log_multi_beta(self.beta, vocabSize)
 
         for m in range(n_docs):
             for z in range(self.n_sentiment_components):
                 lik += log_multi_beta(self.n_dst[m, z, :]+self.gammaVec)
-        
-            lik += log_multi_beta(self.n_ds[m,:]+self.alphaVec)
-        
-        lik -= n_docs * self.n_sentiment_components * log_multi_beta(self.gammaVec)
+
+            lik += log_multi_beta(self.n_ds[m, :]+self.alphaVec)
+
+        lik -= n_docs * self.n_sentiment_components * \
+            log_multi_beta(self.gammaVec)
         lik -= n_docs * log_multi_beta(self.alphaVec)
-    
+
         return lik
-        
+
     def perplexity(self):
         """Calculate approximate perplexity for the whole corpus.
         Perplexity is defined as exp(-1. * log-likelihood per word)
-        
+
         Returns
         ------------
         score : float
