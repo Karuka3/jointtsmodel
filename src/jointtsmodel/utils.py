@@ -81,38 +81,7 @@ def word_indices(wordOccuranceVec):
             yield idx
 
 
-def coherence_score_uci(X, inv_vocabulary, top_words):
-    """
-    Extrinsic UCI coherence measure
-    Parameter
-    ----------
-    X : array-like, shape=(n_samples, n_features)
-            Document word matrix.
-    inv_vocabulary: dict
-        Dictionary of index and vocabulary from vectorizer.
-    top_words: list
-        List of top words for each topic-sentiment pair
-    Returns
-    -----------
-    score: float
-    """
-    wordoccurances = (X > 0).astype(int)
-    totalcnt = 0
-    total = 0
-    for allwords in top_words:
-        for word1 in allwords:
-            for word2 in allwords:
-                if word1 != word2:
-                    ind1 = inv_vocabulary[word1]
-                    ind2 = inv_vocabulary[word2]
-                    if ind1 > ind2:
-                        total += np.log((wordoccurances.shape[0]*(np.matmul(wordoccurances[:, ind1], wordoccurances[:, ind2])+1))/(
-                            wordoccurances[:, ind1].sum()*wordoccurances[:, ind2].sum()))
-                        totalcnt += 1
-    return total/totalcnt
-
-
-def coherence_score_umass(X, inv_vocabulary, top_words):
+def coherence_score_umass(X, inv_vocabulary, top_words, normalized=False):
     """
     Extrinsic UMass coherence measure
     Parameter
@@ -123,16 +92,62 @@ def coherence_score_umass(X, inv_vocabulary, top_words):
         Dictionary of index and vocabulary from vectorizer.
     top_words: list
         List of top words for each topic-sentiment pair
+    normalized: bool
+        If true, return to NPMI
     Returns
     -----------
     score: float
     """
     wordoccurances = (X > 0).astype(int)
+    N = np.array(X.sum(axis=0))[0]
+    totalcnt = 0
+    PMI = 0
+    NPMI = 0
+    for allwords in top_words:
+        for word1 in allwords:
+            for word2 in allwords:
+                if word1 != word2:
+                    ind1 = inv_vocabulary[word1]
+                    ind2 = inv_vocabulary[word2]
+                    if ind1 > ind2:
+                        denominator = (wordoccurances[:, ind1].sum(
+                        )/N) * (wordoccurances[:, ind2].sum()/N)
+                        numerator = (
+                            (np.matmul(wordoccurances[:, ind1], wordoccurances[:, ind2])) + 1) / (N+1)
+                        PMI += np.log(numerator) - np.log(denominator)
+                        NPMI += (np.log(denominator) / np.log(numerator)) - 1
+                        totalcnt += 1
+    if normalized:
+        score = NPMI / totalcnt
+    else:
+        score = PMI / totalcnt
+    return score
+
+
+def coherence_score_uci(X, inv_vocabulary, top_words, external_corpus):
+    """
+    Extrinsic UCI coherence measure
+    Parameter
+    ----------
+    X : array-like, shape=(n_samples, n_features)
+            Document word matrix.
+    inv_vocabulary: dict
+        Dictionary of index and vocabulary from vectorizer.
+    top_words: list
+        List of top words for each topic-sentiment pair
+    external_corpus: array-like, shape=(n_samples, n_features)
+            Document word matrix.
+    Returns
+    -----------
+    score: float
+    """
+    wordoccurances = (X > 0).astype(int)
+    N = np.array(X.sum(axis=0))[0]
     totalcnt = 0
     total = 0
     for i in range(len(top_words)):
         # ast.literal_eval(topic_sentiment_df.top_words.iloc[i])
-        allwords = topic_sentiment_df.top_words.iloc[i]
+        allwords = external_corpus.top_words.iloc[i]
         for word1 in allwords:
             for word2 in allwords:
                 if word1 != word2:
