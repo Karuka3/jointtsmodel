@@ -99,7 +99,7 @@ def coherence_score_umass(X, inv_vocabulary, top_words, normalized=False):
     score: float
     """
     wordoccurances = (X > 0).astype(int)
-    N = np.array(X.sum(axis=0))[0]
+    N = X.shape[0]
     totalcnt = 0
     PMI = 0
     NPMI = 0
@@ -110,10 +110,10 @@ def coherence_score_umass(X, inv_vocabulary, top_words, normalized=False):
                     ind1 = inv_vocabulary[word1]
                     ind2 = inv_vocabulary[word2]
                     if ind1 > ind2:
-                        denominator = (wordoccurances[:, ind1].sum(
-                        )/N) * (wordoccurances[:, ind2].sum()/N)
+                        denominator = (np.count_nonzero(wordoccurances > 0, axis=0)[
+                                       ind1]/N) * (np.count_nonzero(wordoccurances > 0, axis=0)[ind2]/N)
                         numerator = (
-                            (np.matmul(wordoccurances[:, ind1], wordoccurances[:, ind2])) + 1) / (N+1)
+                            (np.matmul(wordoccurances[:, ind1], wordoccurances[:, ind2])) + 1) / N
                         PMI += np.log(numerator) - np.log(denominator)
                         NPMI += (np.log(denominator) / np.log(numerator)) - 1
                         totalcnt += 1

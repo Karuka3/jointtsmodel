@@ -75,7 +75,7 @@ class TSWE(BaseEstimator):
         by `np.random`.
     Attributes
     ----------
-    components_ : array, [vocabSize, n_topic_components, n_sentiment_components]
+    components_ : array, [self.vocabSize, n_topic_components, n_sentiment_components]
         topic-sentiment word distribution. Since the complete
         conditional for topic word distribution is a Dirichlet,
         ``components_[i, j, k]`` can be viewed as pseudocount that represents the
@@ -121,7 +121,7 @@ class TSWE(BaseEstimator):
         """Initialize fit variables
         Parameters
         ----------
-        X : array-like, shape=(n_docs, vocabSize)
+        X : array-like, shape=(n_docs, self.vocabSize)
             Document word matrix.
         lexicon_dict : dict
             Dictionary of word lexicons with sentiment score
@@ -135,7 +135,7 @@ class TSWE(BaseEstimator):
         self._init_latent_vars()
         self.word_embeddings = word_embedding_matrix
 
-        n_docs, vocabSize = self.wordOccurenceMatrix.shape
+        n_docs, self.vocabSize = self.wordOccurenceMatrix.shape
 
         # Pseudocounts
         self.n_ds = np.zeros((n_docs, self.n_sentiment_components))
@@ -143,10 +143,10 @@ class TSWE(BaseEstimator):
             (n_docs, self.n_sentiment_components, self.n_topic_components))
         self.n_d = np.zeros((n_docs))
         self.n_vts = np.zeros(
-            (vocabSize, self.n_topic_components, self.n_sentiment_components))
+            (self.vocabSize, self.n_topic_components, self.n_sentiment_components))
         self.n_ts = np.zeros(
             (self.n_topic_components, self.n_sentiment_components))
-        self.n_vt = np.zeros((vocabSize, self.n_topic_components))
+        self.n_vt = np.zeros((self.vocabSize, self.n_topic_components))
 
         self.topic_embeddings = np.zeros(
             (self.n_topic_components, self.embedding_dim))
@@ -225,7 +225,7 @@ class TSWE(BaseEstimator):
         """Learn model for the data X with Gibbs sampling.
         Parameters
         ----------
-        X : array-like, shape=(n_docs, vocabSize)
+        X : array-like, shape=(n_docs, self.vocabSize)
             Document word matrix.
         lexicon_dict : dict
             Dictionary of word lexicons with sentiment score
@@ -246,7 +246,7 @@ class TSWE(BaseEstimator):
 
         self.all_loglikelihood = []
         self.all_perplexity = []
-        n_docs, vocabSize = self.wordOccurenceMatrix.shape
+        n_docs, self.vocabSize = self.wordOccurenceMatrix.shape
         for iteration in tqdm(range(max_iter)):
             for d in range(n_docs):
                 for i, v in enumerate(word_indices(self.wordOccurenceMatrix[d, :])):
@@ -297,9 +297,6 @@ class TSWE(BaseEstimator):
             #loglikelihood_ = self.loglikelihood()
             #perplexity_ = self.perplexity()
 
-            # self.all_loglikelihood.append(loglikelihood_)
-            # self.all_perplexity.append(perplexity_)
-
             # if self.evaluate_every > 0 and (iteration+1)%self.evaluate_every == 0:
             #    if self.verbose > 0:
             #        print ("Perplexity after iteration {} (out of {} iterations) is {:.2f}".format(iteration + 1, max_iter, perplexity_))
@@ -335,7 +332,7 @@ class TSWE(BaseEstimator):
         """Fit and transform data according to fitted model.
         Parameters
         ----------
-        X : array-like, shape=(n_docs, vocabSize)
+        X : array-like, shape=(n_docs, self.vocabSize)
             Document word matrix.
         lexicon_dict : dict
             Dictionary of word lexicons with sentiment score
@@ -369,6 +366,7 @@ class TSWE(BaseEstimator):
         -----------
         Log-likelihood score: float
         """
+        score = 0
         raise NotImplementedError("To be implemented")
 
     def perplexity(self):
@@ -379,12 +377,14 @@ class TSWE(BaseEstimator):
         ------------
         score : float
         """
-        raise NotImplementedError("To be implemented")
+        score = np.exp((-1.) * self.loglikelihood() /
+                       np.sum(self.wordOccurenceMatrix))
+        return score
 
-    def getSentiment(self, data_size):
+    def getSentiment(self):
         normalized_n_ds = self.transform()
         y_pred = []
-        for d in range(data_size):
+        for d in range(self.wordOccurenceMatrix.shape[0]):
             max_index = np.argmax(normalized_n_ds[d])
             y_pred.append(max_index)
         return y_pred
